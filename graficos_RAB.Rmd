@@ -1,0 +1,99 @@
+---
+title: "Estadísticas de mujeres en México 2019 "
+subtitle: 'Indicadores de inclusión social, igualdad y empoderamiento  2019' 
+author: "Raquel Arcos Bulos"
+date: "19/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.align = 'center', fig.width = 10 )
+```
+
+### Introducción
+
+El objetivo de este trabajo es visualizar indicadores relevantes sobre inclusión social, igualdad y empoderamiento de las mujeres en México en el año 2019 utilizando el lenguaje de procesamiento estadístico `R` el cual permite elaborar una gama muy amplia de gráficos.
+
+La fuente de datos es el Instituto Nacional de las Mujeres (INMUJERES) y estos pueden consultarse y descargarse en el portal de [Datos Abiertos del Gobierno de México](https://datos.gob.mx/busca/dataset/estadisticas-de-mujeres-indicadores-de-inclusion-social-igualdad-y-empoderamiento).
+
+Presento el código correspondiente a cada uno de los gráficos para las personas interesadas en reproducirlos.
+
+```{r include=FALSE}
+library(tidyverse)
+library(dslabs)
+```
+
+```{r echo=TRUE}
+#Tema de ggplot creado por el investigador Rafael Irizarry
+ds_theme_set()
+#Vectores de colores para los graficos
+colores <- c("dodgerblue4","deeppink3")
+```
+
+### 1) Porcentaje de mujeres jueces y magistradas en los juzgados y tribunales superiores de justicia estatales
+Proporción de mujeres con nombramiento de jueces y magistrados en los juzgados y tribunales superiores de justicia estatales con respecto al total de jueces y magistrados en los juzgados y tribunales superiores de justicia estatales
+
+
+```{r}
+jueces <- read.csv('Jueces_magistradas.csv',header = TRUE, sep = ",")
+jueces <- rename(jueces, entidad='Entidad')
+jueces <- jueces %>%
+          select(-c(Total, 'X._hombres', 'X._mujeres')) %>% 
+          filter(entidad!='Nacional', Año>=2019) %>% 
+          pivot_longer(Hombres:Mujeres, names_to='Sexo', values_to='JM') %>% 
+          mutate(Ent_abr=fct_recode(entidad,
+                            "Ags."="Aguascalientes", 
+                            "BC" ="Baja California", 
+                            "BCS" ="Baja California Sur",
+                            "Camp." = "Campeche", 
+                            "Coah." = "Coahuila de Zaragoza",  
+                            "Col."="Colima", 
+                            "Chis."="Chiapas",
+                            "Chih."="Chihuahua", 
+                            "CDMX"="Ciudad de México", 
+                            "Dgo."="Durango", 
+                            "Gto."="Guanajuato", 
+                            "Gro."="Guerrero", 
+                            "Hgo."="Hidalgo", 
+                            "Jal."="Jalisco", 
+                            "Mex."="México", 
+                            "Mich."="Michoacán de Ocampo", 
+                            "Mor."="Morelos", 
+                            "Nay."="Nayarit", 
+                            "NL"="Nuevo León", 
+                            "Oax."="Oaxaca", 
+                            "Pue."="Puebla", 
+                            "Qro."="Querétaro", 
+                            "Q.Roo"="Quintana Roo", 
+                            "SLP"="San Luis Potosí", 
+                            "Sin."="Sinaloa", 
+                            "Son."="Sonora", 
+                            "Tab."="Tabasco", 
+                            "Tamps."="Tamaulipas", 
+                            "Tlax."="Tlaxcala", 
+                            "Ver."="Veracruz de Ignacio de la Llave", 
+                            "Yuc."="Yucatán", 
+                            "Zac."="Zacatecas"))
+```
+
+```{r}
+jueces$Sexo <- as.factor(jueces$Sexo)
+```
+
+```{r eval=TRUE, fig.height = 7, fig.width = 12, echo=TRUE}
+jueces %>% 
+      ggplot(aes(x=fct_reorder(Ent_abr, JM), y=JM))+
+      geom_col(aes(fill=reorder(Sexo, desc(Sexo)))) +
+      xlab('Entidad')+
+      ylab('Proporción')+
+      scale_fill_manual(values=rev(colores), name="Sexo")+
+      theme(axis.title = element_text(size=15, face="bold"),
+            axis.text = element_text(size=13), 
+            axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+
+
+
+
+
